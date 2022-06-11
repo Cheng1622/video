@@ -52,7 +52,7 @@ func (t *Index) Up() {
 
 		vidile, err := http.Get(t.R.FormValue("url"))
 		resUrl1 := strings.Split(U.Path, ".")
-		resUrl := "./Up/" + t.ss.GetId()[:len(t.ss.GetId())-1] + "." + resUrl1[1]
+		resPath := "./Up/" + t.ss.GetId()[:len(t.ss.GetId())-1] + "." + resUrl1[1]
 		// download success
 
 		// 需要分块读取，待修改
@@ -67,10 +67,10 @@ func (t *Index) Up() {
 		}
 
 		// ffmpeg 处理
-		// resUrl:= vidile.Header.Get()
+		// resPath:= vidile.Header.Get()
 		log.Print(U)
 		cmd := exec.Command(
-			"/usr/bin/ffmpeg", "-i", "./Up/"+t.ss.GetId(), "-ss", t.R.FormValue("begin"), "-to", t.R.FormValue("end"), "-strict", "-2", "-qscale", "0", "-intra", resUrl)
+			"/usr/bin/ffmpeg", "-i", "./Up/"+t.ss.GetId(), "-ss", t.R.FormValue("begin"), "-to", t.R.FormValue("end"), "-strict", "-2", "-qscale", "0", "-intra", resPath)
 		err = cmd.Run()
 
 		if err != nil {
@@ -79,7 +79,9 @@ func (t *Index) Up() {
 		}
 
 		// 处理完成后赋值
-		t.ss.Set("vurl", resUrl)
+		resUrl2 := strings.Split(resPath, "/")
+
+		t.ss.Set("vurl", "/api/Index/Down/"+resUrl2[2])
 
 		t.ss.Set("vStatus", 9)
 	}()
@@ -99,5 +101,18 @@ func (t *Index) GetUrl() {
 		weblib.NewWebBase(t.W, t.R).WebErr("0")
 		return
 	}
+
 	weblib.NewWebBase(t.W, t.R).WebSucess(t.ss.Get("vurl").(string))
+}
+func (t *Index) Down() {
+	fn1 := strings.Split(t.R.URL.Path, "/")
+	fn := "./Up/" + fn1[len(fn1)-1]
+	data, err := ioutil.ReadFile(fn)
+	if err != nil {
+		panic("")
+	}
+	t.W.Header().Add("content-type", "video/mp4")
+	t.W.WriteHeader(200)
+	t.W.Write(data)
+
 }
