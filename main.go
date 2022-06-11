@@ -1,11 +1,11 @@
 package main
 
 import (
+	"Demo/controller"
 	"embed"
 	"fmt"
 
 	goweb "github.com/cjie9759/goWeb"
-	"github.com/cjie9759/goWeb/Demo/controller"
 )
 
 //go:embed public/*
